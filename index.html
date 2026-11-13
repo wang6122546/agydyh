@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>督查检查 · 移动端原型</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; background: light-dark(#e8edf6, #111827); }
+  @media (max-width: 460px) {
+    #supervision-preview { padding: 0 !important; }
+    #supervision-preview .phone { border-radius: 0 !important; min-height: 100dvh; }
+  }
+</style>
+</head>
+<body>
+<div id="supervision-preview">
+  <div class="phone">
+    <header><button type="button" data-back hidden>‹ 返回</button><h2>督查检查</h2></header>
+    <main>
+      <section data-screen="list">
+        <nav class="categories" aria-label="检查类别">
+          <button type="button" data-category="" aria-pressed="true">全部</button><button type="button" data-category="日常检查" aria-pressed="false">日常检查</button><button type="button" data-category="特殊检查" aria-pressed="false">特殊检查</button><button type="button" data-category="专家检查" aria-pressed="false">专家检查</button><button type="button" data-category="督察一级检查" aria-pressed="false">督察一级检查</button>
+        </nav>
+        <div class="toolbar">
+          <input type="search" placeholder="搜索单位、检查人或隐患分类" aria-label="搜索隐患">
+          <button type="button" data-filter aria-expanded="false">筛选</button>
+        </div>
+        <div class="toolbar">
+
+          <select data-period aria-label="检查时间"><option value="3">近三日</option><option value="1">今日</option><option value="yesterday">昨日</option><option value="7">近7日</option><option value="month">本月</option><option value="quarter">近3个月</option><option value="custom">自定义</option></select>
+        </div>
+        <div class="filters" data-dates hidden><label>开始日期<input type="date" data-start value="2026-11-09"></label><label>结束日期<input type="date" data-end value="2026-11-11"></label></div>
+        <div class="filters" data-filters hidden>
+          <label>下发状态<select data-field="issued"><option value="">全部</option><option>未下发</option><option>已下发</option></select></label>
+          <label>整改状态<select data-field="rectification"><option value="">全部</option><option>待整改</option><option>已整改</option></select></label>
+          <label>隐患层级<select data-field="level"><option value="">全部</option><option>单位隐患</option><option>公司隐患</option></select></label>
+          <label>隐患等级<select data-field="severity"><option value="">全部</option><option>一般隐患</option><option>重大隐患</option><option>轻微隐患</option></select></label>
+        </div>
+        <p class="muted" data-count aria-live="polite"></p>
+        <div data-results></div>
+        <footer class="report-footer"><button type="button" class="primary wide" data-report>＋ 隐患上报</button></footer>
+      </section>
+      <section data-screen="detail" hidden><div data-detail></div></section>
+      <section data-screen="report" hidden>
+        <form>
+          <fieldset><legend>检查信息</legend>
+            <details class="picker" data-unit-picker>
+              <summary>隐患单位 <span data-unit-value>请选择组织</span></summary>
+              <details class="org-branch" open><summary>鞍钢矿业</summary>
+                <details class="org-branch" open><summary>生产单位</summary>
+                  <label class="choice"><input type="radio" name="unit" value="选矿车间" required>选矿车间</label>
+                </details>
+                <details class="org-branch" open><summary>职能部门</summary>
+                  <label class="choice"><input type="radio" name="unit" value="设备保障部" required>设备保障部</label>
+                </details>
+              </details>
+            </details>
+            <label>检查类别<select name="category" required><option>日常检查</option><option>特殊检查</option><option>专家检查</option><option>督察一级检查</option></select></label>
+            <label>检查时间<input name="date" type="date" value="2026-11-11" required></label>
+            <label>检查人<select name="inspector" required><option value="">请选择检查人</option><option>刘师傅</option><option>陈师傅</option></select></label>
+          </fieldset>
+          <fieldset><legend>隐患信息</legend>
+            <label>隐患描述<textarea name="description" maxlength="200" placeholder="请输入隐患描述" required></textarea><span class="word-count" data-count-for="description">0/200</span></label>
+            <label>隐患位置<input name="location" maxlength="50" placeholder="请输入隐患位置" required><span class="word-count" data-count-for="location">0/50</span></label>
+            <details class="picker"><summary>隐患分类 <span data-classification>请选择</span></summary>
+              <label class="choice"><input type="checkbox" name="classification" value="设备设施">设备设施</label>
+              <label class="choice"><input type="checkbox" name="classification" value="现场管理">现场管理</label>
+              <label class="choice"><input type="checkbox" name="classification" value="安全资料管理类">安全资料管理类</label>
+            </details>
+            <label>隐患等级<select name="severity"><option>一般隐患</option><option>重大隐患</option><option>轻微隐患</option></select></label>
+            <div role="group" aria-label="隐患层级">隐患层级
+              <label class="choice"><input type="radio" name="level" value="单位隐患" checked>单位隐患</label>
+              <label class="choice"><input type="radio" name="level" value="公司隐患">公司隐患</label>
+              <p class="muted" data-tier-note></p>
+            </div>
+            <div class="upload-field">
+              <p>隐患照片 <small>最多5张，PNG 或 JPG</small></p>
+              <div class="photo-grid" data-photo-grid></div>
+              <label class="photo-add">＋ 添加照片<input name="photos" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" multiple></label>
+              <p data-photo-error role="alert" hidden></p>
+            </div>
+          </fieldset>
+          <fieldset><legend>整改安排</legend>
+            <label>隐患整改人员<select name="assignee" required><option value="">请选择</option><option>王师傅 · 选矿车间</option><option>李师傅 · 设备保障部</option></select></label>
+            <label>隐患整改期限<input name="deadline" type="date" required></label>
+            <div class="deadline-options" role="group" aria-label="整改期限快捷选项">
+              <small>快捷选项</small><button type="button" data-days="7">一周</button><button type="button" data-days="14">两周</button><button type="button" data-days="30">一个月</button><button type="button" data-days="60">两个月</button>
+            </div>
+            <label>主管部门和姓名<input name="departmentContact" maxlength="50"></label>
+            <label>分管职务领导和姓名<input name="leaderContact" maxlength="50"></label>
+          </fieldset>
+          <footer class="report-footer"><button class="primary wide">确认上报</button></footer>
+        </form>
+      </section>
+      <p data-notice role="status"></p>
+      <dialog data-confirm><h3 data-confirm-title></h3><p data-confirm-copy></p><form method="dialog" class="toolbar"><button value="cancel" autofocus>取消</button><button value="confirm" class="primary">确认</button></form></dialog>
+    </main>
+  </div>
+</div>
+<style>
+#supervision-preview { padding: 12px; }
+#supervision-preview .phone { max-width: 415px; margin: auto; border-radius: 20px; overflow: hidden; background: light-dark(#f0f4fb,#172133); color: light-dark(#16233b,#eef4ff); font: 15px/1.45 system-ui,sans-serif; box-shadow: 0 6px 28px #172b492e; }
+#supervision-preview header { display:flex; align-items:center; gap:12px; min-height:60px; padding:0 16px; background:#222841; color:white; }
+#supervision-preview h2, #supervision-preview h3 { margin:0; font-size:1.1em; }
+#supervision-preview main { padding:14px; }
+#supervision-preview [hidden] { display:none !important; }
+#supervision-preview .toolbar, #supervision-preview .tags { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+#supervision-preview .toolbar input { flex:1; }
+#supervision-preview .toolbar select { flex:1; }
+#supervision-preview button, #supervision-preview input, #supervision-preview select, #supervision-preview textarea { box-sizing:border-box; min-width:0; min-height:44px; font:inherit; padding:8px 10px; color:inherit; background:light-dark(#fff,#24314a); border:1px solid light-dark(#d2daeb,#475773); border-radius:9px; }
+#supervision-preview header button { background:transparent; }
+#supervision-preview .primary { background:#315bd8; color:white; border-color:#315bd8; font-weight:650; }
+#supervision-preview .wide { width:100%; margin-top:10px; }
+#supervision-preview .record, #supervision-preview fieldset { display:block; width:100%; box-sizing:border-box; padding:14px; margin:0 0 10px; text-align:left; background:light-dark(#fff,#222e43); border:1px solid light-dark(#e0e6f1,#42516b); border-radius:12px; overflow-wrap:anywhere; }
+#supervision-preview .tag { padding:3px 7px; border-radius:5px; background:light-dark(#e7efff,#253d68); }
+#supervision-preview .pending { background:light-dark(#fff0d5,#62471d); }
+#supervision-preview .muted { color:light-dark(#53627b,#b8c6de); margin:8px 0; }
+#supervision-preview .filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+#supervision-preview label { display:grid; gap:4px; margin-bottom:8px; }
+#supervision-preview label > * { width:100%; }
+#supervision-preview dl { display:grid; grid-template-columns:auto minmax(0,1fr); gap:7px 12px; }
+#supervision-preview dd { margin:0; }
+#supervision-preview img { width:100%; max-height:280px; object-fit:contain; }
+#supervision-preview [data-notice]:empty { display:none; }
+
+#supervision-preview .categories { display:flex; gap:6px; overflow-x:auto; margin:0 0 12px; padding-bottom:4px; }
+#supervision-preview .categories button { flex:none; white-space:nowrap; }
+#supervision-preview .categories [aria-pressed=true] { color:white; background:#315bd8; border-color:#315bd8; }
+#supervision-preview .card-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+#supervision-preview .card-heading .tags { flex:0 0 auto; flex-wrap:wrap; justify-content:flex-end; max-width:112px; margin:0; font-size:12px; }
+#supervision-preview .actions { display:flex; gap:8px; margin-top:10px; }
+#supervision-preview .swipe { position:relative; overflow:hidden; border-radius:12px; margin-bottom:10px; }
+#supervision-preview .swipe .record { position:relative; margin:0; transition:transform .18s; touch-action:pan-y; }
+#supervision-preview .swipe.revealed .record { transform:translateX(-68px); }
+#supervision-preview .swipe .delete { position:absolute; inset:0 0 0 auto; width:68px; border:0; border-radius:0; background:#b42329; color:white; }
+#supervision-preview .choice { display:flex; align-items:center; gap:8px; min-height:44px; margin:0; }
+#supervision-preview .choice input { width:18px; min-height:auto; }
+#supervision-preview .picker { margin-bottom:8px; }
+#supervision-preview .picker summary { padding:10px 0; }
+#supervision-preview .org-branch { margin-left: 14px; }
+#supervision-preview .picker span { margin-left:6px; }
+#supervision-preview dialog { max-width:min(340px, 85vw); border:0; border-radius:12px; padding:18px; color:inherit; background:light-dark(#fff,#222e43); }
+#supervision-preview dialog::backdrop { background:#151d3766; }
+
+#supervision-preview .phone { color-scheme:light; background:#fff; color:#252a34; overflow:clip; }
+#supervision-preview .phone header {
+  position:sticky; top:0; z-index:2; background:#fff; color:#252a34; border-bottom:1px solid #e8e8e8;
+}
+#supervision-preview .phone:has([data-screen="report"]:not([hidden])) main { padding:0; }
+#supervision-preview [data-screen="list"] .toolbar input,
+#supervision-preview [data-screen="list"] .toolbar select,
+#supervision-preview [data-screen="list"] .filters input,
+#supervision-preview [data-screen="list"] .filters select { background:#f5f6f8; border-color:#e8e8e8; }
+#supervision-preview .primary { background:#0256f7; border-color:#0256f7; }
+#supervision-preview .categories { border-bottom:1px solid #e8e8e8; }
+#supervision-preview .categories button { background:#fff; border:0; border-radius:0; border-bottom:2px solid transparent; }
+#supervision-preview .categories [aria-pressed=true] { background:#fff; color:#0256f7; border-bottom-color:#0256f7; font-weight:650; }
+#supervision-preview .swipe { border-radius:0; margin-bottom:0; }
+#supervision-preview .swipe .record,
+#supervision-preview [data-screen="detail"] .record { background:#fff; border:0; border-radius:0; padding:14px 0; }
+#supervision-preview .swipe .record { border-bottom:1px solid #e8e8e8; }
+#supervision-preview .actions button { color:#0256f7; background:#fff; border-color:#dbe6ff; }
+#supervision-preview [data-screen="list"] .report-footer { margin:12px -14px -14px; }
+#supervision-preview [data-screen="detail"] dl { gap:0 12px; }
+#supervision-preview [data-screen="detail"] dt,
+#supervision-preview [data-screen="detail"] dd { padding:11px 0; border-bottom:1px solid #e8e8e8; }
+#supervision-preview [data-screen="detail"] dd { text-align:right; }
+#supervision-preview [data-screen="report"] fieldset {
+  min-width:0; padding:0 16px; margin:0; border:0; border-radius:0; background:#fff;
+}
+#supervision-preview [data-screen="report"] legend {
+  box-sizing:border-box; width:100%; padding:12px 0 6px; color:#596273; font-size:13px;
+}
+#supervision-preview [data-screen="report"] fieldset > label {
+  grid-template-columns:minmax(92px, 40%) minmax(0, 1fr);
+  align-items:center; gap:12px; min-height:46px; margin:0; border-bottom:1px solid #e8e8e8;
+}
+#supervision-preview [data-screen="report"] label:has(textarea),
+#supervision-preview [data-screen="report"] label:has(input[type=file]) {
+  grid-template-columns:1fr; gap:0; padding-top:10px;
+}
+#supervision-preview [data-screen="report"] input,
+#supervision-preview [data-screen="report"] textarea,
+#supervision-preview [data-screen="report"] select {
+  background:#fff; color:#252a34; border:0; border-radius:0; padding-inline:0;
+}
+#supervision-preview [data-screen="report"] textarea { min-height:80px; }
+#supervision-preview [data-screen="report"] .picker { margin:0; border-bottom:1px solid #e8e8e8; }
+#supervision-preview [data-screen="report"] .picker span { color:#596273; }
+#supervision-preview [data-screen="report"] [role="group"] { padding:10px 0; border-bottom:1px solid #e8e8e8; }
+#supervision-preview [data-screen="report"] .muted { color:#596273; }
+#supervision-preview .report-footer { position:sticky; bottom:0; background:#fff; }
+#supervision-preview .report-footer .primary { height:54px; margin:0; border:0; border-radius:0; background:#0256f7; }
+#supervision-preview .picker-trigger {
+  display:flex; width:100%; justify-content:space-between; align-items:center; gap:12px;
+  padding:0; background:#fff; border:0; border-bottom:1px solid #e8e8e8; border-radius:0;
+}
+#supervision-preview .picker-trigger > span:first-child { flex:none; }
+#supervision-preview .picker-value { color:#596273; text-align:right; overflow-wrap:anywhere; padding:8px 0; }
+#supervision-preview .picker-value::after { content:' ›'; margin-left:6px; }
+#supervision-preview .picker-sheet {
+  position:fixed; inset:auto 0 0; margin:0 auto; width:min(100%,415px); max-width:none;
+  box-sizing:border-box; padding:0 16px env(safe-area-inset-bottom); border-radius:16px 16px 0 0;
+  background:#fff; color:#252a34;
+}
+#supervision-preview .sheet-title { display:grid; grid-template-columns:44px 1fr 44px; align-items:center; text-align:center; padding:4px 0; }
+#supervision-preview .sheet-title h3 { grid-column:2; }
+#supervision-preview .sheet-title button { border:0; background:#fff; font-size:24px; color:#657084; }
+#supervision-preview .sheet-body { max-height:60dvh; min-height:min(28dvh,180px); overflow:auto; overscroll-behavior:contain; padding-bottom:12px; }
+#supervision-preview [data-screen="report"] .unit-search { width:100%; padding:8px 14px; background:#f3f4f6; border-radius:24px; }
+#supervision-preview .unit-empty { text-align:center; color:#657084; }
+#supervision-preview .sheet-option { display:block; width:100%; text-align:left; background:#fff; border:0; border-radius:0; }
+#supervision-preview .sheet-option[aria-pressed="true"] { color:#0256f7; }
+#supervision-preview .sheet-body > .choice { flex-direction:row-reverse; justify-content:space-between; }
+#supervision-preview .sheet-confirm { margin:0 0 8px; }
+#supervision-preview .phone:has([data-screen="report"]:not([hidden])) header { background:#0256f7; color:#fff; justify-content:center; }
+#supervision-preview .phone:has([data-screen="report"]:not([hidden])) header button { position:absolute; left:8px; border:0; }
+#supervision-preview [data-screen="report"] label:has([name="location"]) { grid-template-columns:1fr; gap:0; padding-top:8px; }
+#supervision-preview .word-count { text-align:right; color:#657084; font-size:12px; padding-bottom:6px; }
+#supervision-preview .upload-field { padding:10px 0; border-bottom:1px solid #e8e8e8; }
+#supervision-preview .upload-field p { margin:0 0 8px; }
+#supervision-preview .upload-field small { color:#657084; }
+#supervision-preview [data-screen="report"] .photo-add { display:inline-grid; min-height:44px; place-items:center; padding:0 12px; border:1px dashed #98a5b9; border-radius:8px; margin:4px 0 0; }
+#supervision-preview .photo-add input { position:absolute; width:1px; height:1px; min-height:0; opacity:0; }
+#supervision-preview .photo-add:focus-within { outline:2px solid #0256f7; }
+#supervision-preview .photo-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+#supervision-preview .photo-grid figure { position:relative; margin:0; }
+#supervision-preview .photo-grid img { display:block; aspect-ratio:1; object-fit:cover; border-radius:8px; }
+#supervision-preview .photo-grid button { position:absolute; right:0; top:0; background:#fff; }
+#supervision-preview [data-photo-error] { color:#b42329; }
+#supervision-preview .deadline-options { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 0; border-bottom:1px solid #e8e8e8; }
+#supervision-preview .deadline-options button { padding-inline:8px; font-size:13px; }
+#supervision-preview .deadline-options [aria-pressed="true"] { color:#0256f7; background:#eef4ff; border-color:#0256f7; }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('supervision-preview');
+  const find = selector => root.querySelector(selector);
+  const rows = [
+    {description:'皮带机尾部防护罩固定螺栓松动',unit:'选矿车间',date:'2026-11-11',category:'日常检查',inspector:'刘师傅',classification:'设备设施',location:'二号皮带机',severity:'一般隐患',level:'单位隐患',issued:'未下发',photos:[]},
+    {description:'检修平台通道堆放备件',unit:'设备保障部',date:'2026-11-10',category:'特殊检查',inspector:'陈师傅',classification:'现场管理',location:'检修平台',severity:'一般隐患',level:'公司隐患',issued:'已下发',rectification:'待整改',assignee:'李师傅 · 设备保障部',deadline:'2026-11-18',photos:[]}
+  ];
+  const escape = value => String(value ?? '—').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char]);
+  const tags = row => '<div class="tags"><span class="tag '+(row.issued === '未下发' ? 'pending' : '')+'">'+row.issued+'</span>'+(row.rectification ? '<span class="tag pending">'+row.rectification+'</span>' : '')+'</div>';
+  function screen(name, title) {
+    root.querySelectorAll('[data-screen]').forEach(section => section.hidden = section.dataset.screen !== name);
+    find('h2').textContent = title;
+    find('[data-back]').hidden = name === 'list';
+    find('[data-notice]').textContent = '';
+  }
+  let category = '';
+  let swiped = null;
+  let pendingAction = null;
+  const results = find('[data-results]');
+  const dialog = find('[data-confirm]');
+  function setCategory(value) {
+    category = value;
+    root.querySelectorAll('[data-category]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.category === value)));
+  }
+  root.querySelectorAll('[data-category]').forEach(button => button.onclick = () => {
+    setCategory(button.dataset.category);
+    render();
+  });
+  function render() {
+    const term = find('input[type=search]').value.trim().toLowerCase();
+    const period = find('[data-period]').value;
+    const ranges = {'1':['2026-11-11','2026-11-11'],yesterday:['2026-11-10','2026-11-10'],'3':['2026-11-09','2026-11-11'],'7':['2026-11-05','2026-11-11'],month:['2026-11-01','2026-11-30'],quarter:['2026-09-01','2026-11-30']};
+    const [start,end] = ranges[period] || [find('[data-start]').value,find('[data-end]').value];
+    find('[data-dates]').hidden = period !== 'custom';
+    const filters = [...root.querySelectorAll('[data-field]')];
+    const matching = rows.filter(row => (!start || row.date >= start) && (!end || row.date <= end) &&
+      (!category || row.category === category) && filters.every(filter => !filter.value || row[filter.dataset.field] === filter.value) &&
+      [row.unit,row.inspector,row.assignee,row.classification].join(' ').toLowerCase().includes(term));
+    find('[data-count]').textContent = '共 '+matching.length+' 条 · 模拟数据';
+    results.innerHTML = matching.map(row => {
+      const index = rows.indexOf(row);
+      const action = row.issued === '未下发' ? '下发单位' : row.rectification === '待整改' ? '收回' : '';
+      return '<div class="swipe'+(swiped === row ? ' revealed' : '')+'" data-index="'+index+'">'+
+        '<button type="button" class="delete" data-action="删除" '+(swiped === row ? '' : 'tabindex="-1" aria-hidden="true"')+'>删除</button>'+
+        '<article class="record"><div class="card-heading"><strong>'+escape(row.description)+'</strong>'+tags(row)+'</div>'+
+        '<p class="muted">'+escape(row.unit)+' · '+escape(row.date)+'</p><span>'+escape(row.category)+' · '+escape(row.severity)+'</span>'+
+        '<div class="actions"><button type="button" data-row="'+index+'">详情</button>'+
+        (action ? '<button type="button" data-action="'+action+'">'+action+'</button>' : '')+
+        '<button type="button" data-more aria-expanded="'+(swiped === row)+'" aria-label="显示或隐藏删除操作">更多</button></div></article></div>';
+    }).join('') || '<p>没有符合条件的记录</p>';
+
+  }
+  const detailFields = {category:'检查类别',unit:'隐患单位',date:'检查时间',inspector:'检查人',classification:'隐患分类',location:'隐患位置',severity:'隐患等级',level:'隐患层级',assignee:'隐患整改人员',deadline:'整改期限',departmentContact:'主管部门和姓名',leaderContact:'分管职务领导和姓名'};
+  find('[data-results]').addEventListener('click', event => {
+    const card = event.target.closest('[data-index]');
+    if (!card) return;
+    const selected = rows[Number(card.dataset.index)];
+    if (event.target.closest('[data-more]')) {
+      swiped = swiped === selected ? null : selected;
+      render();
+      const target = swiped ? '[data-action="删除"]' : '[data-more]';
+      results.querySelector('[data-index="'+card.dataset.index+'"] '+target).focus();
+      return;
+    }
+    const action = event.target.closest('[data-action]')?.dataset.action;
+    if (action) {
+      pendingAction = {row:selected,action};
+      find('[data-confirm-title]').textContent = '确认'+action;
+      find('[data-confirm-copy]').textContent = {
+        删除:'确认删除这条隐患记录？',
+        下发单位:'确认将这条隐患下发至 '+selected.unit+'？',
+        收回:'确认收回这条隐患？收回后将恢复为未下发。'
+      }[action];
+      dialog.returnValue = '';
+      dialog.showModal();
+      return;
+    }
+    const button = event.target.closest('[data-row]');
+    if (!button) return;
+    const row = rows[Number(button.dataset.row)];
+    find('[data-detail]').innerHTML = '<article class="record">'+tags(row)+'<h3>'+escape(row.description)+'</h3><dl>'+Object.entries(detailFields).map(([key,label]) => '<dt>'+label+'</dt><dd>'+escape(row[key])+'</dd>').join('')+'</dl><h3>隐患照片</h3>'+(row.photos.length ? row.photos.map(url => '<img src="'+escape(url)+'" alt="隐患照片">').join('') : '<p class="muted">暂无照片</p>')+'</article>';
+    screen('detail','隐患详情');
+  });
+  let gesture;
+  results.addEventListener('touchstart', event => {
+    const card = event.target.closest('[data-index]');
+    if (card && event.touches.length === 1) {
+      const {clientX,clientY} = event.touches[0];
+      gesture = {row:rows[Number(card.dataset.index)],clientX,clientY};
+    }
+  }, {passive:true});
+  results.addEventListener('touchend', event => {
+    if (!gesture) return;
+    const {clientX,clientY} = event.changedTouches[0];
+    const dx = clientX - gesture.clientX;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(clientY - gesture.clientY)) {
+      swiped = dx < 0 ? gesture.row : null;
+      render();
+    }
+    gesture = null;
+  }, {passive:true});
+  results.addEventListener('touchcancel', () => { gesture = null; });
+  dialog.addEventListener('close', () => {
+    if (dialog.returnValue !== 'confirm' || !pendingAction) return;
+    const {row,action} = pendingAction;
+    pendingAction = null;
+    if (action === '删除') rows.splice(rows.indexOf(row),1).forEach(item => item.photos.forEach(url => URL.revokeObjectURL(url)));
+    if (action === '下发单位') Object.assign(row,{issued:'已下发',rectification:'待整改'});
+    if (action === '收回') Object.assign(row,{issued:'未下发',rectification:''});
+    swiped = null;
+    render();
+    find('[data-notice]').textContent = '已'+action+'（模拟）';
+  });
+  find('[data-filter]').onclick = event => {
+    const panel = find('[data-filters]');
+    panel.hidden = !panel.hidden;
+    event.currentTarget.setAttribute('aria-expanded', String(!panel.hidden));
+  };
+  find('[data-screen=list]').addEventListener('input',render);
+  find('[data-back]').onclick = () => screen('list','督查检查');
+  find('[data-report]').onclick = () => screen('report','隐患上报');
+  const reportForm = find('[data-screen=report] form');
+  function createPicker(source, title, readValue) {
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'picker-trigger';
+    trigger.setAttribute('aria-haspopup','dialog');
+    const label = document.createElement('span');
+    label.textContent = title;
+    const value = document.createElement('span');
+    value.className = 'picker-value';
+    trigger.append(label,value);
+    const sheet = document.createElement('dialog');
+    sheet.className = 'picker-sheet';
+    sheet.setAttribute('aria-label',title);
+    sheet.innerHTML = '<div class="sheet-title"><h3></h3><button type="button" aria-label="关闭">×</button></div><div class="sheet-body"></div>';
+    sheet.querySelector('h3').textContent = title;
+    sheet.querySelector('button').onclick = () => sheet.close();
+    sheet.addEventListener('click', event => { if (event.target === sheet) sheet.close(); });
+    source.before(trigger,sheet);
+    const update = () => { value.textContent = readValue() || '请选择'+title; };
+    const open = () => { if (!sheet.open) sheet.showModal(); };
+    trigger.onclick = open;
+    sheet.addEventListener('close', () => trigger.focus());
+    update();
+    return {sheet,body:sheet.querySelector('.sheet-body'),open,update};
+  }
+
+  const unitSource = find('[data-unit-picker]');
+  const unitOptions = [...unitSource.querySelectorAll('[name=unit]')];
+  const unitPicker = createPicker(unitSource,'隐患单位',() => unitOptions.find(option => option.checked)?.value);
+  const search = document.createElement('input');
+  search.type = 'search';
+  search.className = 'unit-search';
+  search.placeholder = '公司名称模糊搜索';
+  search.setAttribute('aria-label',search.placeholder);
+  const empty = document.createElement('p');
+  empty.className = 'unit-empty';
+  empty.textContent = '暂无数据';
+  empty.hidden = true;
+  const tree = unitSource.querySelector('.org-branch');
+  const branches = [...tree.querySelectorAll('details')].reverse();
+  unitPicker.body.append(search,tree,empty);
+  unitSource.remove();
+  search.addEventListener('input', () => {
+    const keyword = search.value.trim().toLowerCase();
+    unitOptions.forEach(option => {
+      const group = option.closest('details').querySelector('summary').textContent;
+      option.closest('label').hidden = !('鞍钢矿业 '+group+' '+option.value).toLowerCase().includes(keyword);
+    });
+    branches.forEach(branch => {
+      branch.hidden = !branch.querySelector('label:not([hidden])');
+      if (keyword && !branch.hidden) branch.open = true;
+    });
+    tree.hidden = unitOptions.every(option => option.closest('label').hidden);
+    if (keyword && !tree.hidden) tree.open = true;
+    empty.hidden = !tree.hidden;
+  });
+  unitPicker.sheet.addEventListener('close', () => {
+    search.value = '';
+    search.dispatchEvent(new Event('input'));
+  });
+  unitOptions.forEach(option => {
+    option.addEventListener('change', () => {
+      unitPicker.update();
+      unitPicker.sheet.close();
+    });
+    option.addEventListener('invalid', () => {
+      if (!reportForm.querySelector('dialog[open]')) unitPicker.open();
+      tree.open = true;
+      option.closest('details').open = true;
+    });
+  });
+
+  const classificationSource = find('[data-classification]').closest('details');
+  const categoryChecks = [...classificationSource.querySelectorAll('[name=classification]')];
+  const selectedCategories = () => categoryChecks.filter(box => box.checked).map(box => box.value);
+  const classificationPicker = createPicker(classificationSource,'隐患分类',() => selectedCategories().join('、'));
+  classificationPicker.body.append(...classificationSource.querySelectorAll('label'));
+  classificationSource.remove();
+  const confirmClassification = document.createElement('button');
+  confirmClassification.type = 'button';
+  confirmClassification.className = 'primary wide sheet-confirm';
+  confirmClassification.textContent = '完成';
+  confirmClassification.onclick = () => classificationPicker.sheet.close();
+  classificationPicker.body.after(confirmClassification);
+
+  const selectPickers = [...reportForm.querySelectorAll('select')].map(select => {
+    const source = select.closest('label');
+    const title = source.firstChild.textContent.trim();
+    const picker = createPicker(source,title,() => select.value);
+    const options = [...select.options].filter(option => option.value);
+    options.forEach(option => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'sheet-option';
+      button.textContent = option.textContent;
+      button.onclick = () => {
+        select.value = option.value;
+        picker.update();
+        picker.sheet.close();
+      };
+      picker.body.append(button);
+    });
+    const open = picker.open;
+    picker.sheet.previousElementSibling.onclick = () => {
+      [...picker.body.children].forEach((button,index) => button.setAttribute('aria-pressed',String(options[index].value === select.value)));
+      open();
+    };
+    select.addEventListener('invalid', () => { if (!reportForm.querySelector('dialog[open]')) open(); });
+    source.hidden = true;
+    return picker;
+  });
+  const photosInput = reportForm.elements.photos;
+  function updateClassification() {
+    const selected = selectedCategories();
+    classificationPicker.update();
+    categoryChecks[0].setCustomValidity(selected.length ? '' : '请选择至少一项隐患分类');
+  }
+  categoryChecks.forEach(box => box.addEventListener('change',updateClassification));
+  categoryChecks[0].addEventListener('invalid', () => { if (!reportForm.querySelector('dialog[open]')) classificationPicker.open(); });
+  const photoDraft = [];
+  const photoGrid = find('[data-photo-grid]');
+  const photoError = find('[data-photo-error]');
+  const photoAdd = photosInput.closest('label');
+  function renderPhotos() {
+    photoGrid.replaceChildren();
+    photoDraft.forEach((url,index) => {
+      const item = document.createElement('figure');
+      const image = document.createElement('img');
+      image.src = url;
+      image.alt = '隐患照片 '+(index+1);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label','移除照片 '+(index+1));
+      remove.onclick = () => {
+        URL.revokeObjectURL(photoDraft.splice(index,1)[0]);
+        photoError.hidden = true;
+        renderPhotos();
+      };
+      item.append(image,remove);
+      photoGrid.append(item);
+    });
+    photoAdd.hidden = photoDraft.length >= 5;
+  }
+  photosInput.addEventListener('change', () => {
+    const files = [...photosInput.files];
+    photosInput.value = '';
+    const invalid = files.some(file => !file.size || !/\.(png|jpe?g)$/i.test(file.name) ||
+      (file.type && !['image/png','image/jpeg'].includes(file.type)));
+    const message = invalid ? '请选择 PNG 或 JPG 照片' : photoDraft.length + files.length > 5 ? '最多上传5张照片' : '';
+    photoError.textContent = message;
+    photoError.hidden = !message;
+    if (message) return;
+    photoDraft.push(...files.map(file => URL.createObjectURL(file)));
+    renderPhotos();
+  });
+  function refreshReport() {
+    reportForm.querySelectorAll('[data-count-for]').forEach(counter => {
+      const input = reportForm.elements[counter.dataset.countFor];
+      counter.textContent = input.value.length+'/'+input.maxLength;
+    });
+    find('[data-tier-note]').textContent = reportForm.elements.level.value === '单位隐患'
+      ? '上报至隐患单位，在单位内部流转、整改。'
+      : '由监管单位知晓、督办和考核，可由隐患单位上报或通过督查检查上报。';
+  }
+  reportForm.addEventListener('input',refreshReport);
+  const deadline = reportForm.elements.deadline;
+  const shortcuts = [...reportForm.querySelectorAll('[data-days]')];
+  function selectShortcut(active) {
+    shortcuts.forEach(button => button.setAttribute('aria-pressed',String(button === active)));
+  }
+  shortcuts.forEach(button => button.onclick = () => {
+    const date = new Date();
+    date.setDate(date.getDate()+Number(button.dataset.days));
+    deadline.value = [date.getFullYear(),date.getMonth()+1,date.getDate()].map(part => String(part).padStart(2,'0')).join('-');
+    selectShortcut(button);
+  });
+  deadline.addEventListener('input', () => selectShortcut(null));
+  selectShortcut(null);
+  refreshReport();
+  updateClassification();
+  reportForm.onsubmit = event => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const photos = photoDraft.splice(0);
+    rows.unshift({...Object.fromEntries(data),classification:data.getAll('classification').join('、'),photos,issued:'未下发'});
+    event.currentTarget.reset();
+    selectShortcut(null);
+    photoError.hidden = true;
+    renderPhotos();
+    refreshReport();
+    updateClassification();
+    unitPicker.update();
+    selectPickers.forEach(picker => picker.update());
+    find('input[type=search]').value = '';
+    setCategory('');
+    root.querySelectorAll('[data-field]').forEach(filter => filter.value = '');
+    find('[data-start]').value = rows[0].date;
+    find('[data-end]').value = rows[0].date;
+    find('[data-period]').value = 'custom';
+    screen('list','督查检查');
+    render();
+    find('[data-notice]').textContent = '已添加模拟上报记录';
+  };
+  render();
+})();
+</script>
+</body>
+</html>
